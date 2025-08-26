@@ -12,11 +12,11 @@
 |ID|Nombre del Archivo|Categoria|Versión|Ubicación|Responsable|Criticidad|Última modificación|
 |----|-------------------|-----------|---------|-----------|-------------|------------|---------------------|
 | CI-001 | TP final.docx | Documentación | 3.0 | /documentacion/requerimientos/ | Anibal C. | Baja | 2025-10-06 |
-| CI-002 | diagrama_casos_uso.drawio | Diseño | 1.0 | /diseño/diagramas/ | María G. | Alta | 2024-08-18 |
-| CI-003 | prototipo_login.html | Código | 0.5 | /codigo/fuente/ | Carlos L. | Media | 2024-08-10 |
-| CI-004 | logo_proyecto.svg | Recursos | 1.0 | /recursos/imagenes/ | Ana M. | Baja | 2024-08-12 |
-| CI-005 | manual_usuario.pdf | Documentación | 0.8 | /documentacion/manuales/ | Juan P. | Media | 2024-08-16 |
-| CI-006 | diagrama_arquitectura.drawio | Diseño | 2.0 | /diseño/arquitectura/ | María G. | Alta | 2024-08-14 |
+| CI-002 | diagrama_casos_uso.drawio | Diseño | 2.0 | /diseño/diagramas/ | Anibal C. | Media | 2025-10-06 |
+| CI-003 | Diagrama de Dominio.drawio | Diseño | 1.5 | /diseño/diagramas | Anibal C. | Alta | 2025-10-06 |
+| CI-004 | Diagrama de Contexto N0.drawio | Diseño | 2.0 | /diseño/diagramas/ | Matias Z. | Alta | 2025-10-06 |
+| CI-005 | Diagrama de Contexto N1.drawio | Diseño | 1.0 | /diseño/diagramas/ | Matias Z. | Alta | 2025-10-06 |
+| CI-006 | Atributos de calidad.xlsx | Documentación | 1.0 | /documentacion/requerimientos/ | Matias Z. | Baja | 2025-10-06 |
 
 ## Estadísticas por Categoría
 - **Documentación:** 2 CIs
@@ -31,6 +31,6 @@
 
 ## Información Adicional
 - **Tamaño total:** 670,1 kB
-- **Formatos de archivo:** [lista de extensiones: .docx, .drawio, .pdf, .xlsx]
+- **Formatos de archivo:** [lista de extensiones: .docx, .drawio, .xlsx]
 
 
