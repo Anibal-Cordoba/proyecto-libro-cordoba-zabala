@@ -16,7 +16,7 @@
 ## Elementos de Configuración
 Total de CIs: [6]
 - Documentación: [0] CIs
-- Diseño: [5] CIs
+- Diseño: [8] CIs
 - Código: [0] CIs
 - Recursos: [1] CIs
 

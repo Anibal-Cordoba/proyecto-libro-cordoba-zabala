@@ -20,7 +20,7 @@
 
 ## Estadísticas por Categoría
 - **Documentación:** 2 CIs
-- **Diseño:** 4 CIs  
+- **Diseño:** 8 CIs  
 - **Código:** 0 CIs
 - **Recursos:** 0 CIs
 
