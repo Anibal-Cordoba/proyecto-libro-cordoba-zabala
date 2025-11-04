@@ -10,8 +10,8 @@ from pathlib import Path
 # Añadir el directorio padre al path para imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from dependencies import get_db
-from schemas import CapituloCreate, CapituloResponse, CapituloUpdate
+from api.dependencies import get_db
+from api.schemas.capitulo import CapituloCreate, CapituloResponse, CapituloUpdate
 from db.contenido.models import Capitulo
 
 router = APIRouter(

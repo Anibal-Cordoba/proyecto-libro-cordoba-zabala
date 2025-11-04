@@ -14,7 +14,7 @@ from pathlib import Path
 # Agregar el directorio padre al path para imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from routers import capitulos_router
+from api.routers.capitulos import router as capitulos_router
 
 # Crear aplicación FastAPI
 app = FastAPI(
@@ -32,8 +32,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configurar templates
-templates = Jinja2Templates(directory="templates")
+# Configurar templates (usar path absoluto)
+template_dir = Path(__file__).parent / "templates"
+templates = Jinja2Templates(directory=str(template_dir))
 
 # Incluir routers de API
 app.include_router(capitulos_router, prefix="/api")
