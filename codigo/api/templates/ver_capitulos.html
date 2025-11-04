@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Capítulos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 1000px;
+            margin: 40px auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: bold;
+        }
+        
+        .btn-home {
+            background: #f0f0f0;
+            color: #666;
+        }
+        
+        .btn-crear {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .capitulos-list {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .capitulo-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .capitulo-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .capitulo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .capitulo-numero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .capitulo-titulo {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .capitulo-tema {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .capitulo-intro {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .capitulo-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9em;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-editar {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn-eliminar {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-small:hover {
+            opacity: 0.8;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📖 Lista de Capítulos</h1>
+            <div>
+                <a href="/" class="btn btn-home">🏠 Inicio</a>
+                <a href="/crear-capitulo" class="btn btn-crear">➕ Nuevo Capítulo</a>
+            </div>
+        </div>
+        
+        <div id="capitulos-container">
+            <div class="loading">Cargando capítulos...</div>
+        </div>
+    </div>
+    
+    <script>
+        async function cargarCapitulos() {
+            try {
+                const response = await fetch('/api/capitulos/');
+                const capitulos = await response.json();
+                
+                const container = document.getElementById('capitulos-container');
+                
+                if (capitulos.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty">
+                            <div class="empty-icon">📚</div>
+                            <h2>No hay capítulos todavía</h2>
+                            <p>Comienza creando tu primer capítulo</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = '<div class="capitulos-list">' + 
+                    capitulos.map(cap => `
+                        <div class="capitulo-card">
+                            <div class="capitulo-header">
+                                <div>
+                                    <div class="capitulo-numero">Capítulo ${cap.numero}</div>
+                                </div>
+                            </div>
+                            <h2 class="capitulo-titulo">${cap.titulo}</h2>
+                            <div class="capitulo-tema">📌 ${cap.tema}</div>
+                            ${cap.introduccion ? `<p class="capitulo-intro">${cap.introduccion}</p>` : ''}
+                            <div class="capitulo-actions">
+                                <button class="btn-small btn-eliminar" onclick="eliminarCapitulo('${cap.id_capitulo}', '${cap.titulo}')">
+                                    🗑️ Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    `).join('') + 
+                    '</div>';
+                    
+            } catch (error) {
+                document.getElementById('capitulos-container').innerHTML = 
+                    '<div class="empty">❌ Error al cargar los capítulos</div>';
+            }
+        }
+        
+        async function eliminarCapitulo(id, titulo) {
+            if (!confirm(`¿Estás seguro de eliminar el capítulo "${titulo}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/capitulos/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('✅ Capítulo eliminado exitosamente');
+                    cargarCapitulos();
+                } else {
+                    alert('❌ Error al eliminar el capítulo');
+                }
+            } catch (error) {
+                alert('❌ Error de conexión');
+            }
+        }
+        
+        // Cargar capítulos al iniciar
+        cargarCapitulos();
+    </script>
+</body>
+</html>

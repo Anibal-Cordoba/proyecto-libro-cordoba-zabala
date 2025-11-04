@@ -13,6 +13,18 @@
 - `codigo/`: Codigo fuente y scripts del proyecto
 - `recursos/`: Imágenes, plantillas y otros recursos
 
+## 🚀 Instalación y Uso
+
+Para instalar y usar el sistema de paquetes del proyecto, consulta la documentación completa:
+
+**➡️ [Ver Guía de Instalación](codigo/README.md)**
+
+La guía incluye:
+- Instalación de los 12 paquetes independientes
+- Ejemplos de uso
+- Configuración de bases de datos
+- Arquitectura del sistema
+
 ## Elementos de Configuración
 Total de CIs: [6]
 - Documentación: [0] CIs
@@ -21,4 +33,4 @@ Total de CIs: [6]
 - Recursos: [1] CIs
 
 ## Última actualización
-[26/08/2025] - v1.0
+[03/11/2025] - v2.0 - Arquitectura de paquetes independientes

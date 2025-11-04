@@ -1,0 +1,37 @@
+# Requirements para el Proyecto de Libro Interactivo
+# ===================================================
+
+# Base de datos
+sqlalchemy>=2.0.0
+pymysql>=1.1.0           # Driver MySQL para SQLAlchemy
+cryptography>=41.0.0     # Requerido por PyMySQL
+alembic>=1.12.0          # Para migraciones de BD
+
+# Variables de entorno
+python-dotenv>=1.0.0
+
+# AWS SDK (para S3)
+boto3>=1.28.0
+
+# Framework Web
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.4.0
+jinja2>=3.1.2              # Para templates HTML
+
+# Autenticación y seguridad
+# python-jose[cryptography]>=3.3.0  # Para JWT
+# passlib[bcrypt]>=1.7.4            # Para hashing de passwords
+
+# Para testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-html>=3.2.0         # Reportes HTML de tests
+pytest-xdist>=3.3.0        # Ejecución paralela de tests
+httpx>=0.25.0              # Cliente HTTP para FastAPI TestClient
+requests>=2.31.0           # Para tests de integración
+
+# Para desarrollo
+black>=23.0.0      # Formateador de código
+flake8>=6.0.0      # Linter
+mypy>=1.5.0        # Type checking
