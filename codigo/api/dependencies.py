@@ -3,6 +3,7 @@ Dependencias de la API
 """
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.pool import StaticPool
 from typing import Generator
 import os
 from pathlib import Path
@@ -11,10 +12,22 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuración de base de datos
-# Para desarrollo usamos SQLite, para producción MySQL
+# Para tests usamos memoria, para desarrollo SQLite, para producción MySQL
+TESTING = os.getenv("TESTING", "false").lower() == "true"
 USE_SQLITE = os.getenv("USE_SQLITE", "true").lower() == "true"
 
-if USE_SQLITE:
+if TESTING:
+    # Base de datos temporal para tests (se borra al finalizar pytest)
+    # Usando archivo temporal es más confiable que :memory: con múltiples conexiones
+    db_path = Path(__file__).parent.parent / "data" / "test_contenido.db"
+    db_path.parent.mkdir(exist_ok=True)
+    DATABASE_URL = f"sqlite:///{db_path}"
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        echo=False  # Cambiar a True para debug SQL
+    )
+elif USE_SQLITE:
     # Base de datos SQLite en el directorio del proyecto
     db_path = Path(__file__).parent.parent / "data" / "contenido.db"
     db_path.parent.mkdir(exist_ok=True)

@@ -15,6 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from api.routers.capitulos import router as capitulos_router
+from api.routers.contenidos import router as contenidos_router
 
 # Crear aplicación FastAPI
 app = FastAPI(
@@ -38,6 +39,7 @@ templates = Jinja2Templates(directory=str(template_dir))
 
 # Incluir routers de API
 app.include_router(capitulos_router, prefix="/api")
+app.include_router(contenidos_router, prefix="/api")
 
 # Ruta principal - Página de inicio
 @app.get("/", response_class=HTMLResponse)
@@ -56,6 +58,12 @@ async def crear_capitulo_page(request: Request):
 async def ver_capitulos_page(request: Request):
     """Página para ver capítulos"""
     return templates.TemplateResponse("ver_capitulos.html", {"request": request})
+
+
+@app.get("/gestionar-contenidos", response_class=HTMLResponse)
+async def gestionar_contenidos_page(request: Request):
+    """Página para gestionar contenidos (texto, imagen, video, 3D)"""
+    return templates.TemplateResponse("gestionar_contenidos.html", {"request": request})
 
 
 @app.get("/health")

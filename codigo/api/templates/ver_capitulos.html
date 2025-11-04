@@ -77,11 +77,18 @@
             padding: 25px;
             border-left: 5px solid #667eea;
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         
         .capitulo-card:hover {
             transform: translateX(5px);
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            background: #fff;
+        }
+        
+        .capitulo-card.expanded {
+            background: #fff;
+            border-left-color: #764ba2;
         }
         
         .capitulo-header {
@@ -162,6 +169,82 @@
             font-size: 4em;
             margin-bottom: 20px;
         }
+        
+        .contenidos-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            display: none;
+        }
+        
+        .contenidos-section.show {
+            display: block;
+        }
+        
+        .contenidos-header {
+            font-size: 1.2em;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .contenido-item {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .contenido-tipo {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .tipo-texto { background: #e3f2fd; color: #1976d2; }
+        .tipo-imagen { background: #f3e5f5; color: #7b1fa2; }
+        .tipo-video { background: #fff3e0; color: #f57c00; }
+        .tipo-objeto3d { background: #e8f5e9; color: #388e3c; }
+        
+        .contenido-tema {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .contenido-detalle {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .loading-contenidos {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+        
+        .sin-contenidos {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .toggle-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s;
+            display: inline-block;
+        }
+        
+        .toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
     </style>
 </head>
 <body>
@@ -200,16 +283,26 @@
                 
                 container.innerHTML = '<div class="capitulos-list">' + 
                     capitulos.map(cap => `
-                        <div class="capitulo-card">
+                        <div class="capitulo-card" onclick="toggleContenidos('${cap.id_capitulo}', event)" id="cap-${cap.id_capitulo}">
                             <div class="capitulo-header">
                                 <div>
                                     <div class="capitulo-numero">Capítulo ${cap.numero}</div>
                                 </div>
+                                <span class="toggle-icon" id="icon-${cap.id_capitulo}">▼</span>
                             </div>
                             <h2 class="capitulo-titulo">${cap.titulo}</h2>
                             <div class="capitulo-tema">📌 ${cap.tema}</div>
                             ${cap.introduccion ? `<p class="capitulo-intro">${cap.introduccion}</p>` : ''}
-                            <div class="capitulo-actions">
+                            
+                            <!-- Sección de contenidos (oculta inicialmente) -->
+                            <div class="contenidos-section" id="contenidos-${cap.id_capitulo}">
+                                <div class="contenidos-header">📚 Contenidos del capítulo:</div>
+                                <div id="contenidos-list-${cap.id_capitulo}" class="loading-contenidos">
+                                    Cargando contenidos...
+                                </div>
+                            </div>
+                            
+                            <div class="capitulo-actions" onclick="event.stopPropagation()">
                                 <button class="btn-small btn-eliminar" onclick="eliminarCapitulo('${cap.id_capitulo}', '${cap.titulo}')">
                                     🗑️ Eliminar
                                 </button>
@@ -222,6 +315,108 @@
                 document.getElementById('capitulos-container').innerHTML = 
                     '<div class="empty">❌ Error al cargar los capítulos</div>';
             }
+        }
+        
+        async function toggleContenidos(idCapitulo, event) {
+            // Evitar que el clic en botones active el toggle
+            if (event.target.closest('.capitulo-actions')) {
+                return;
+            }
+            
+            const contenidosSection = document.getElementById(`contenidos-${idCapitulo}`);
+            const card = document.getElementById(`cap-${idCapitulo}`);
+            const icon = document.getElementById(`icon-${idCapitulo}`);
+            
+            // Toggle de la sección
+            const isVisible = contenidosSection.classList.contains('show');
+            
+            if (isVisible) {
+                // Ocultar
+                contenidosSection.classList.remove('show');
+                card.classList.remove('expanded');
+                icon.classList.remove('rotated');
+            } else {
+                // Mostrar y cargar contenidos
+                contenidosSection.classList.add('show');
+                card.classList.add('expanded');
+                icon.classList.add('rotated');
+                await cargarContenidosCapitulo(idCapitulo);
+            }
+        }
+        
+        async function cargarContenidosCapitulo(idCapitulo) {
+            const contenidosList = document.getElementById(`contenidos-list-${idCapitulo}`);
+            
+            try {
+                const response = await fetch(`/api/contenidos/capitulo/${idCapitulo}`);
+                const contenidos = await response.json();
+                
+                if (contenidos.length === 0) {
+                    contenidosList.innerHTML = `
+                        <div class="sin-contenidos">
+                            <p>📭 Este capítulo no tiene contenidos aún</p>
+                            <p style="font-size: 0.9em; margin-top: 10px;">
+                                <a href="/gestionar-contenidos" style="color: #667eea;">➕ Agregar contenidos</a>
+                            </p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                contenidosList.innerHTML = contenidos.map(cont => {
+                    const tipoClass = `tipo-${cont.tipo}`;
+                    const emoji = getTipoEmoji(cont.tipo);
+                    let detalle = '';
+                    
+                    if (cont.tipo === 'texto') {
+                        const preview = cont.cuerpo_texto?.substring(0, 150) || '';
+                        detalle = `<div class="contenido-detalle">${preview}${preview.length >= 150 ? '...' : ''}</div>`;
+                    } else if (cont.tipo === 'imagen') {
+                        detalle = `
+                            <div class="contenido-detalle">
+                                📎 <a href="${cont.url_archivo}" target="_blank" style="color: #667eea;">Ver imagen</a>
+                                (${cont.formato})
+                            </div>
+                        `;
+                    } else if (cont.tipo === 'video') {
+                        detalle = `
+                            <div class="contenido-detalle">
+                                🎬 <a href="${cont.url_archivo}" target="_blank" style="color: #667eea;">Ver video</a>
+                                ${cont.duracion ? `- Duración: ${cont.duracion}s` : ''}
+                            </div>
+                        `;
+                    } else if (cont.tipo === 'objeto3d') {
+                        detalle = `
+                            <div class="contenido-detalle">
+                                🎨 <a href="${cont.url_archivo}" target="_blank" style="color: #667eea;">Ver modelo 3D</a>
+                                (${cont.formato})
+                            </div>
+                        `;
+                    }
+                    
+                    return `
+                        <div class="contenido-item">
+                            <span class="contenido-tipo ${tipoClass}">${emoji} ${cont.tipo.toUpperCase()}</span>
+                            <div class="contenido-tema">${cont.tema}</div>
+                            ${detalle}
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                contenidosList.innerHTML = '<div class="sin-contenidos">❌ Error al cargar contenidos</div>';
+                console.error('Error:', error);
+            }
+        }
+        
+        function getTipoEmoji(tipo) {
+            const emojis = {
+                'texto': '📝',
+                'imagen': '🖼️',
+                'video': '🎥',
+                'objeto3d': '🎨'
+            };
+            return emojis[tipo] || '📄';
         }
         
         async function eliminarCapitulo(id, titulo) {

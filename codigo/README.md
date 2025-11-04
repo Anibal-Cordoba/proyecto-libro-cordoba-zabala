@@ -1,370 +1,415 @@
-# Libro Interactivo - Sistema de Gestión de Contenidos
-========================================================
+# 📚 Libro Interactivo - Sistema de Gestión de Contenidos
 
-Este proyecto implementa un sistema de gestión de contenidos para libros interactivos en Python, organizado en una **arquitectura modular de paquetes independientes**.
+> Sistema web completo para la gestión y visualización de libros educativos interactivos con capítulos y contenidos multimedia.
 
-## ⚡ Nueva Arquitectura: Paquetes Independientes
+## 🚀 Estado del Proyecto: **Funcional y Operativo** ✅
 
-> **Actualización importante**: El proyecto ahora usa **paquetes independientes instalables** para cada componente.
-
-### Estructura Actual
-
-```
-codigo/
-├── api/                          # 🌐 API REST FastAPI
-│   ├── main.py                   # Aplicación principal
-│   ├── dependencies.py           # Dependencias inyectadas
-│   ├── routers/                  # Endpoints por recurso
-│   │   └── capitulos.py          # CRUD capítulos (100% tested)
-│   ├── schemas/                  # Validación Pydantic
-│   │   ├── capitulo.py
-│   │   └── contenido.py
-│   └── templates/                # Plantillas HTML
-│
-├── tests/                        # 🧪 Tests (115 tests - 100% passing)
-│   ├── conftest.py               # Fixtures compartidos
-│   ├── test_cp01_01_visualizar_capitulo.py   # 13 tests
-│   ├── test_cp01_02_capitulo_inexistente.py  # 19 tests
-│   ├── test_cp02_01_crear_capitulo.py        # 26 tests
-│   ├── test_cp02_02_actualizar_capitulo.py   # 15 tests
-│   ├── test_cp02_03_eliminar_capitulo.py     # 10 tests
-│   ├── test_cp02_04_listar_capitulos.py      # 12 tests
-│   ├── test_cp02_05_validaciones_estado.py   # 8 tests
-│   └── test_models.py                         # 12 tests
-│
-├── testing/                      # 📄 Documentación de tests
-│   ├── README.md                 # Índice
-│   ├── GUIA_RAPIDA_TESTING.md   # Guía de ejecución
-│   ├── RESUMEN_COMPLETO_TESTING.md  # Documento consolidado
-│   └── REPORTE_TESTING_*.md      # Reportes detallados
-│
-├── paquetes/                     # 🎯 Paquetes independientes
-│   ├── modelo_capitulo/          → libro-modelo-capitulo
-│   ├── modelo_contenido/         → libro-modelo-contenido
-│   ├── modelo_texto/             → libro-modelo-texto
-│   ├── modelo_imagen/            → libro-modelo-imagen
-│   ├── modelo_video/             → libro-modelo-video
-│   ├── modelo_objeto3d/          → libro-modelo-objeto3d
-│   ├── modelo_union/             → libro-modelo-union
-│   ├── repositorio_capitulo/     → libro-repositorio-capitulo
-│   ├── repositorio_contenido/    → libro-repositorio-contenido
-│   ├── repositorio_union/        → libro-repositorio-union
-│   ├── gestor_contenido/         → libro-gestor-contenido
-│   ├── gestor_capitulo/          → libro-gestor-capitulo
-│   └── README.md                 # Documentación detallada
-│
-├── db/                           # 💾 Base de datos
-│   ├── contenido/models.py       # Modelos SQLAlchemy (89% coverage)
-│   ├── usuarios/models.py
-│   ├── evaluaciones/models.py
-│   ├── config.py                 # Configuración de conexiones
-│   ├── crear_tablas.py           # Script de creación
-│   └── test_conexiones.py        # Verificar conectividad
-│
-├── htmlcov/                      # 📊 Reportes de coverage
-├── reports/                      # 📈 Reportes de tests
-│
-├── ejecutar_tests.sh             # 🧪 Script de testing
-├── pytest.ini                    # Configuración pytest
-├── instalar_paquetes.sh          # 🚀 Instalar paquetes
-├── crear_paquetes.py             # Script de creación
-├── verificar_paquetes.py         # Verificar instalación
-└── requirements.txt              # Dependencias Python
-```
-
-### Ver Documentación Completa
-
-📖 **[Ver paquetes/README.md](paquetes/README.md)** para documentación completa de la arquitectura de paquetes.
-
-## Arquitectura
-
-El proyecto sigue una **arquitectura por capas**:
-
-1. **Modelos**: Entidades de dominio (Contenido, Capitulo, etc.)
-2. **Repositorios**: Acceso a datos y persistencia
-3. **Gestores**: Lógica de negocio y orquestación
-
-## 🚀 Inicio Rápido
-
-### Instalación Completa (Recomendada)
-
-```bash
-cd codigo
-bash instalar_paquetes.sh
-```
-
-Este script instala los 12 paquetes en el orden correcto según sus dependencias.
-
-### Verificar Instalación
-
-```bash
-python3 verificar_paquetes.py
-```
-
-### Ver Ejemplos
-
-```bash
-python3 ejemplo_paquetes.py
-```
-
-### Instalación Manual Individual
-
-Si solo necesitas paquetes específicos:
-
-```bash
-# Solo modelos (sin dependencias de BD)
-cd paquetes/modelo_capitulo && pip install -e .
-cd paquetes/modelo_contenido && pip install -e .
-
-# Repositorios (requieren SQLAlchemy + MySQL)
-cd paquetes/repositorio_capitulo && pip install -e .
-
-# Gestores (lógica de negocio completa)
-cd paquetes/gestor_capitulo && pip install -e .
-```
-
-## 💻 Uso
-
-### Ejemplo 1: Solo Modelos (sin base de datos)
-
-```python
-from modelo_capitulo import Capitulo
-from modelo_texto import Texto
-from modelo_imagen import Imagen
-
-# Crear objetos de dominio
-capitulo = Capitulo(titulo="Introducción", numero=1)
-texto = Texto(titulo="Variables", cuerpo="Las variables son...", formato="markdown")
-imagen = Imagen(titulo="Diagrama", url_recurso="https://example.com/img.png")
-
-print(capitulo)  # Capitulo(id=..., titulo='Introducción', numero=1)
-print(texto)     # Texto(id=..., titulo='Variables', tipo='texto')
-```
-
-### Ejemplo 2: Con Repositorios (requiere MySQL)
-
-```python
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from repositorio_capitulo import RepositorioCapitulo
-from modelo_capitulo import Capitulo
-
-# Configurar conexión
-engine = create_engine('mysql+pymysql://user:pass@host/contenido_db')
-Session = sessionmaker(bind=engine)
-session = Session()
-
-# Usar repositorio
-repo = RepositorioCapitulo(session)
-capitulo = Capitulo(titulo="Capítulo 1", numero=1)
-repo.guardar(capitulo)
-
-# Buscar
-cap = repo.buscar_por_id(capitulo.id)
-print(f"Encontrado: {cap.titulo}")
-```
-
-### Ejemplo 3: Capa Completa con Gestores
-
-```python
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from gestor_capitulo import GestorCapitulo
-from repositorio_capitulo import RepositorioCapitulo
-from repositorio_contenido import RepositorioContenido
-from repositorio_union import RepositorioUnionCapituloContenido
-
-# Setup
-engine = create_engine('mysql+pymysql://user:pass@host/contenido_db')
-Session = sessionmaker(bind=engine)
-session = Session()
-
-# Crear repositorios y gestor
-repo_cap = RepositorioCapitulo(session)
-repo_cont = RepositorioContenido(session)
-repo_union = RepositorioUnionCapituloContenido(session)
-gestor = GestorCapitulo(repo_cap, repo_cont, repo_union)
-
-# Operaciones de alto nivel
-cap_id = gestor.crear_capitulo(titulo="Introducción", numero=1)
-texto_id = gestor.agregar_texto_a_capitulo(
-    capitulo_id=cap_id,
-    titulo="Primer párrafo",
-    cuerpo="Contenido...",
-    formato="markdown",
-    orden=1
-)
-
-# Obtener contenidos ordenados
-contenidos = gestor.obtener_contenidos_ordenados(cap_id)
-for cont in contenidos:
-    print(f"- {cont.titulo} (tipo: {cont.tipo})")
-```
-
-Para más ejemplos, ejecuta: `python3 ejemplo_paquetes.py`
-
-## Características
-
-### Modelos
-
-- **Contenido**: Clase abstracta base para todos los tipos de contenido
-- **Texto**: Bloques de texto
-- **Imagen**: Imágenes con formato
-- **Video**: Videos con duración
-- **Objeto3D**: Modelos 3D
-- **Capitulo**: Capítulos del libro
-- **UnionCapituloContenido**: Relación N:M entre capítulos y contenidos con orden
-
-### Gestores
-
-- **GestorContenido**:
-  - Crear diferentes tipos de contenido
-  - Actualizar y eliminar contenido
-  - Buscar contenido por ID o tema
-
-- **GestorCapitulo**:
-  - Crear y gestionar capítulos
-  - Asociar contenidos a capítulos
-  - Mantener orden de contenidos
-  - Obtener capítulos completos con contenidos
-
-## 🗄️ Base de Datos
-
-El sistema usa **3 bases de datos MySQL en AWS RDS**:
-
-- **contenido_db**: Capítulos, Contenidos, Uniones
-- **usuarios_db**: Usuarios, Roles, Permisos
-- **evaluaciones_db**: Evaluaciones, Preguntas, Respuestas
-
-### Configuración
-
-1. Edita `db/config.py` con tus credenciales de AWS RDS
-2. Verifica conectividad: `python3 db/test_conexiones.py`
-3. Crea las tablas: `python3 db/crear_tablas.py`
-
-Ver `db/README.md` para documentación completa de la estructura de bases de datos.
-
-## 🧪 Testing
-
-### Estado Actual: ✅ **115/115 tests pasando (100%)**
-
-| Métrica | Valor |
-|---------|-------|
-| Tests Totales | 115 |
-| Tests Pasando | 115 (100%) ✅ |
-| Coverage Routers | 100% ⭐ |
-| Coverage Models | 89% ✅ |
-| Coverage Total | 31% |
-| Tiempo Ejecución | ~3.7s |
-
-### Suites de Tests Implementadas
-
-- ✅ **CP01_01** (13 tests) - Visualizar capítulo publicado
-- ✅ **CP01_02** (19 tests) - Manejo de errores y seguridad
-- ✅ **CP02_01** (26 tests) - Crear capítulo
-- ✅ **CP02_02** (15 tests) - Actualizar capítulo
-- ✅ **CP02_03** (10 tests) - Eliminar capítulo
-- ✅ **CP02_04** (12 tests) - Listar y filtrar capítulos
-- ✅ **CP02_05** (8 tests) - Validaciones de estado
-- ✅ **test_models** (12 tests) - Tests unitarios ORM
-
-### Ejecutar Tests
-
-```bash
-# Todos los tests
-./ejecutar_tests.sh all
-
-# Por caso de prueba
-./ejecutar_tests.sh cp02_01    # Crear capítulo
-./ejecutar_tests.sh cp02_02    # Actualizar capítulo
-./ejecutar_tests.sh cp02_03    # Eliminar capítulo
-
-# Ver reportes
-xdg-open htmlcov/index.html
-```
-
-### Documentación de Testing
-
-- **[testing/GUIA_RAPIDA_TESTING.md](testing/GUIA_RAPIDA_TESTING.md)** - Guía rápida de ejecución
-- **[testing/RESUMEN_COMPLETO_TESTING.md](testing/RESUMEN_COMPLETO_TESTING.md)** - Documento consolidado (115 tests)
-- **[testing/](testing/)** - Todos los reportes detallados
+- ✅ **API REST** completa con FastAPI
+- ✅ **Interfaz Web** para gestión de contenidos
+- ✅ **Base de datos** SQLite configurada
+- ✅ **Sistema de contenidos** con 4 tipos multimedia
+- ✅ **Tests automatizados** (115 tests implementados)
 
 ---
 
-## 📊 Estado del Proyecto
+## ⚡ Inicio Rápido
 
-✅ **Completado**:
-- 12 paquetes independientes instalables
-- Modelos de dominio (7 clases)
-- Repositorios con SQLAlchemy ORM
-- Gestores de lógica de negocio
-- Modelos SQLAlchemy para 3 bases de datos (15 tablas)
-- Scripts de instalación y verificación
-- **API REST FastAPI con CRUD completo**
-- **115 tests con 100% coverage en endpoints**
-- Documentación completa
+### 1. Iniciar el servidor
 
-🔄 **En Desarrollo**:
-- Tests de contenidos y relaciones N:M
-- Validaciones de negocio adicionales
-- Frontend (React/Vue)
+```bash
+cd codigo
+./iniciar_api_final.sh
+```
 
-## 📦 Paquetes Disponibles
+El servidor estará disponible en:
+- 🌐 **Aplicación**: http://localhost:8000
+- 📚 **Documentación API**: http://localhost:8000/docs
+- 🔍 **Health Check**: http://localhost:8000/health
 
-| Paquete | Descripción | Dependencias |
-|---------|-------------|--------------|
-| `libro-modelo-capitulo` | Modelo Capítulo | - |
-| `libro-modelo-contenido` | Modelo base Contenido | - |
-| `libro-modelo-texto` | Modelo Texto | modelo-contenido |
-| `libro-modelo-imagen` | Modelo Imagen | modelo-contenido |
-| `libro-modelo-video` | Modelo Video | modelo-contenido |
-| `libro-modelo-objeto3d` | Modelo Objeto3D | modelo-contenido |
-| `libro-modelo-union` | Modelo Unión | - |
-| `libro-repositorio-capitulo` | Repositorio Capítulo | modelo-capitulo, SQLAlchemy |
-| `libro-repositorio-contenido` | Repositorio Contenido | modelo-contenido, SQLAlchemy |
-| `libro-repositorio-union` | Repositorio Unión | modelo-union, SQLAlchemy |
-| `libro-gestor-contenido` | Gestor Contenido | repositorio-contenido |
-| `libro-gestor-capitulo` | Gestor Capítulo | repositorio-capitulo, repositorio-union |
+### 2. Acceder a la interfaz web
 
-## 🎯 Ventajas de esta Arquitectura
+1. **Página principal**: http://localhost:8000
+2. **Crear capítulos**: http://localhost:8000/crear-capitulo
+3. **Ver capítulos**: http://localhost:8000/ver-capitulos (con contenidos expandibles)
+4. **Gestionar contenidos**: http://localhost:8000/gestionar-contenidos
 
-1. **Modularidad**: Cada componente es independiente
-2. **Reutilización**: Usa solo lo que necesites
-3. **Versionado**: Cada paquete tiene su propia versión
-4. **Testing**: Fácil testear componentes aislados
-5. **Mantenibilidad**: Cambios localizados no afectan otros paquetes
-6. **Despliegue**: Instala solo lo necesario por ambiente
+---
+
+## 📁 Estructura del Proyecto
+
+```
+codigo/
+├── api/                              # 🌐 API REST FastAPI
+│   ├── main.py                       # Aplicación principal
+│   ├── dependencies.py               # Gestión de BD (SQLite/MySQL)
+│   ├── routers/                      # Endpoints por recurso
+│   │   ├── capitulos.py              # CRUD capítulos
+│   │   └── contenidos.py             # CRUD contenidos + asignaciones
+│   ├── schemas/                      # Validación Pydantic
+│   │   ├── capitulo.py               # Schemas de capítulos
+│   │   └── contenido.py              # Schemas de contenidos
+│   └── templates/                    # Plantillas HTML
+│       ├── index.html                # Página principal
+│       ├── crear_capitulo.html       # Formulario de capítulos
+│       ├── ver_capitulos.html        # Vista con contenidos expandibles
+│       └── gestionar_contenidos.html # CRUD de contenidos
+│
+├── db/                               # 💾 Base de datos
+│   ├── config.py                     # Configuración base SQLAlchemy
+│   └── contenido/                    # Modelos de contenido
+│       ├── models.py                 # Capitulo, Contenido, Union
+│       └── __init__.py
+│
+├── data/                             # 📊 Datos persistentes
+│   └── contenido.db                  # Base de datos SQLite
+│
+├── tests/                            # 🧪 Tests automatizados
+│   ├── conftest.py                   # Fixtures compartidos
+│   ├── test_cp01_01_*.py             # Tests de visualización
+│   ├── test_cp02_01_*.py             # Tests de creación
+│   ├── test_cp02_02_*.py             # Tests de actualización
+│   ├── test_cp02_03_*.py             # Tests de eliminación
+│   ├── test_cp02_04_*.py             # Tests de listado
+│   ├── test_cp02_05_*.py             # Tests de validaciones
+│   └── test_models.py                # Tests de modelos ORM
+│
+├── testing/                          # � Documentación de testing
+│   ├── GUIA_RAPIDA_TESTING.md        # Guía de ejecución
+│   └── RESUMEN_COMPLETO_TESTING.md   # Documento consolidado
+│
+├── iniciar_api_final.sh              # 🚀 Script para iniciar servidor
+├── inicializar_db.py                 # 🗄️ Crear tablas en BD
+├── limpiar_db.py                     # 🧹 Limpiar datos de desarrollo
+├── limpiar_tests.py                  # 🧹 Limpiar datos de tests
+├── ejecutar_tests.sh                 # 🧪 Script de testing
+├── pytest.ini                        # ⚙️ Configuración pytest
+├── requirements.txt                  # 📦 Dependencias Python
+└── README.md                         # 📖 Este archivo
+```
+
+---
+
+## 📦 Arquitectura de Paquetes Modulares
+
+El proyecto utiliza una **arquitectura de paquetes descargables e instalables** que permite:
+- ✅ **Reutilizar código** en otros proyectos
+- ✅ **Instalar solo lo necesario** (modular)
+- ✅ **Desarrollar en modo editable** (cambios instantáneos)
+- ✅ **Separación clara** de responsabilidades
+
+### Estructura de Paquetes
+
+```
+paquetes/
+├── gestor_capitulo/          # 🎯 Lógica de negocio para capítulos
+│   ├── gestor_capitulo.py    #    - Validaciones y reglas de negocio
+│   ├── setup.py              #    - CRUD completo con manejo de errores
+│   └── __init__.py           #    - Estados (BORRADOR, PUBLICADO, ARCHIVADO)
+│
+├── gestor_contenido/         # 🎯 Lógica de negocio para contenidos
+│   ├── gestor_contenido.py   #    - 4 tipos: texto, imagen, video, objeto3d
+│   ├── setup.py              #    - Asignación a capítulos con orden
+│   └── __init__.py           #    - Validaciones por tipo de contenido
+│
+├── modelo_capitulo/          # 📊 Modelo ORM del Capítulo
+├── modelo_contenido/         # 📊 Modelo ORM base de Contenido
+├── modelo_texto/             # 📊 Modelo ORM de Texto
+├── modelo_imagen/            # 📊 Modelo ORM de Imagen
+├── modelo_video/             # 📊 Modelo ORM de Video
+├── modelo_objeto3d/          # 📊 Modelo ORM de Objeto3D
+├── repositorio_capitulo/     # 💾 Acceso a datos de capítulos
+├── repositorio_contenido/    # 💾 Acceso a datos de contenidos
+└── repositorio_union/        # 💾 Relaciones capítulo-contenido
+```
+
+### 🚀 Instalar Paquetes
+
+#### Opción 1: Instalar todos los paquetes (Recomendado)
+
+```bash
+# Desde el directorio codigo/
+./instalar_paquetes.sh
+```
+
+Este script instalará todos los paquetes en **modo desarrollo** (`pip install -e`), lo que significa:
+- Los cambios se reflejan inmediatamente sin reinstalar
+- Puedes editar el código y usar los cambios al instante
+- Perfecto para desarrollo activo
+
+#### Opción 2: Instalar paquetes individualmente
+
+```bash
+# Instalar solo el gestor de capítulos
+pip install -e paquetes/gestor_capitulo/
+
+# Instalar solo el gestor de contenidos
+pip install -e paquetes/gestor_contenido/
+
+# Verificar instalación
+pip list | grep "libro-"
+```
+
+### 📚 Uso de los Gestores
+
+Los **routers** de la API ahora son simples **adaptadores** que delegan toda la lógica a los gestores:
+
+```python
+# api/routers/capitulos.py
+from gestor_capitulo import GestorCapitulo
+
+@router.post("/")
+def crear_capitulo(capitulo: CapituloCreate, db: Session = Depends(get_db)):
+    gestor = GestorCapitulo(db, Capitulo)
+    resultado, error = gestor.crear_capitulo(
+        numero=capitulo.numero,
+        titulo=capitulo.titulo,
+        tema=capitulo.tema
+    )
+    if error:
+        raise HTTPException(status_code=400, detail=error)
+    return resultado
+```
+
+**Beneficios**:
+- 🧪 **Testeable**: Puedes probar los gestores sin FastAPI
+- 🔄 **Reutilizable**: Usa los gestores en otros proyectos
+- 📦 **Modular**: Instala solo lo que necesitas
+- 🛡️ **Separación**: Router ≠ Lógica de negocio
+
+---
+
+## 🗄️ Base de Datos
+
+El sistema utiliza **SQLite** para desarrollo (fácil de configurar) con soporte para **MySQL** en producción.
+
+### Tablas Principales
+
+1. **capitulos**
+   - id_capitulo (UUID)
+   - titulo, numero, introduccion, tema
+   - estado (BORRADOR, PUBLICADO, ARCHIVADO)
+   - fecha_creacion, fecha_modificacion
+
+2. **contenidos**
+   - id_contenido (UUID)
+   - tipo (texto, imagen, video, objeto3d)
+   - tema, cuerpo_texto, url_archivo
+   - formato, duracion
+   - fecha_creacion, fecha_modificacion
+
+3. **union_capitulo_contenido**
+   - id, id_capitulo, id_contenido
+   - orden (para ordenar contenidos)
+
+### Configuración
+
+#### Desarrollo (SQLite - Por defecto)
+```bash
+# Ya está configurado, solo ejecuta:
+python inicializar_db.py
+```
+
+#### Producción (MySQL)
+```bash
+# 1. Configura las variables de entorno
+export USE_SQLITE=false
+export DATABASE_URL_CONTENIDO="mysql+pymysql://user:pass@host/contenido_db"
+
+# 2. Crea las tablas
+python db/crear_tablas.py
+```
+
+### Scripts de Utilidad
+
+```bash
+# Limpiar todos los datos
+python limpiar_db.py
+
+# Limpiar solo datos de prueba
+python limpiar_tests.py
+
+# Inicializar/Recrear tablas
+python inicializar_db.py
+```
+
+## 🧪 Testing
+
+## 🌐 API REST
+
+### Endpoints Disponibles
+
+#### Capítulos
+- `POST   /api/capitulos/` - Crear capítulo
+- `GET    /api/capitulos/` - Listar capítulos (con filtros)
+- `GET    /api/capitulos/{id}` - Obtener capítulo específico
+- `PUT    /api/capitulos/{id}` - Actualizar capítulo
+- `DELETE /api/capitulos/{id}` - Eliminar capítulo
+
+#### Contenidos
+- `POST   /api/contenidos/` - Crear contenido (texto/imagen/video/objeto3d)
+- `GET    /api/contenidos/` - Listar contenidos (con filtros)
+- `GET    /api/contenidos/{id}` - Obtener contenido específico
+- `DELETE /api/contenidos/{id}` - Eliminar contenido
+- `POST   /api/contenidos/asignar` - Asignar contenido a capítulo
+- `GET    /api/contenidos/capitulo/{id}` - Listar contenidos de un capítulo
+- `DELETE /api/contenidos/desasignar` - Desasignar contenido de capítulo
+
+### Documentación Interactiva
+
+Una vez iniciado el servidor, accede a:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+Puedes probar todos los endpoints directamente desde la interfaz.
+
+## 🧪 Testing
+
+### Estado Actual: ⚠️ **115 tests implementados**
+
+> **Nota**: Los tests tienen problemas de aislamiento de BD. Se recomienda usar la aplicación web directamente. Ver [Opción 2](#opción-2-ignorar-tests-por-ahora-recomendado).
+
+| Suite | Tests | Descripción |
+|-------|-------|-------------|
+| **CP01_01** | 13 | Visualizar capítulo publicado |
+| **CP01_02** | 19 | Manejo de errores y seguridad |
+| **CP02_01** | 26 | Crear capítulo |
+| **CP02_02** | 15 | Actualizar capítulo |
+| **CP02_03** | 10 | Eliminar capítulo |
+| **CP02_04** | 12 | Listar y filtrar capítulos |
+| **CP02_05** | 8 | Validaciones de estado |
+| **test_models** | 12 | Tests unitarios ORM |
+
+### Opción 1: Ejecutar tests (requiere limpieza manual)
+
+```bash
+# 1. Limpiar BD antes de tests
+python limpiar_db.py
+
+# 2. Ejecutar tests
+./ejecutar_tests.sh all
+
+# 3. Limpiar BD después de tests
+python limpiar_db.py
+```
+
+### Opción 2: Ignorar tests por ahora (Recomendado)
+
+Los tests funcionan pero contaminan la BD de desarrollo. **Usa la interfaz web** para trabajar sin problemas.
+
+### Documentación de Testing
+
+- **[testing/GUIA_RAPIDA_TESTING.md](testing/GUIA_RAPIDA_TESTING.md)** - Guía de ejecución
+- **[testing/RESUMEN_COMPLETO_TESTING.md](testing/RESUMEN_COMPLETO_TESTING.md)** - Documento consolidado (115 tests)
+- **[GUIA_CONTENIDOS.md](GUIA_CONTENIDOS.md)** - Guía del sistema de contenidos
+
+---
+
+## 💻 Uso Avanzado
+
+### Ejemplo: Crear capítulo via API
+
+```bash
+curl -X POST "http://localhost:8000/api/capitulos/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "titulo": "Introducción a Python",
+    "numero": 1,
+    "tema": "Programación",
+    "introduccion": "En este capítulo aprenderemos...",
+    "estado": "BORRADOR"
+  }'
+```
+
+### Ejemplo: Crear contenido de texto
+
+```bash
+curl -X POST "http://localhost:8000/api/contenidos/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tipo": "texto",
+    "tema": "Variables",
+    "cuerpo_texto": "Las variables son espacios de memoria...",
+    "formato": "markdown"
+  }'
+```
+
+### Ejemplo: Asignar contenido a capítulo
+
+```bash
+curl -X POST "http://localhost:8000/api/contenidos/asignar?id_capitulo=<UUID>&id_contenido=<UUID>&orden=1"
+```
 
 ## 📋 Requisitos
 
-- Python >= 3.8
+### Dependencias Principales
+- Python >= 3.13
+- FastAPI >= 0.115.0
 - SQLAlchemy >= 2.0.0
-- PyMySQL >= 1.1.0
-- MySQL 8.0 (AWS RDS)
+- Uvicorn >= 0.32.0
+- Pydantic >= 2.10.0
 
-## 📚 Documentación
+### Instalación de Dependencias
 
-- **[paquetes/README.md](paquetes/README.md)**: Arquitectura de paquetes completa
-- **[db/README.md](db/README.md)**: Estructura de bases de datos
-- **[db/ESQUEMAS.md](db/ESQUEMAS.md)**: Esquemas detallados de tablas
-- **[db/DIAGRAMAS.md](db/DIAGRAMAS.md)**: Diagramas de relaciones
-- **[ARQUITECTURA.md](ARQUITECTURA.md)**: Visión general del sistema
+```bash
+# 1. Instalar dependencias externas (FastAPI, SQLAlchemy, etc.)
+pip install -r requirements.txt
 
-## 🔧 Scripts Útiles
+# 2. Instalar paquetes modulares del proyecto
+./instalar_paquetes.sh
+```
 
-| Script | Descripción |
-|--------|-------------|
-| `instalar_paquetes.sh` | Instala todos los paquetes |
-| `verificar_paquetes.py` | Verifica instalación correcta |
-| `ejemplo_paquetes.py` | Ejemplos de uso |
-| `crear_paquetes.py` | Regenera estructura de paquetes |
-| `db/crear_tablas.py` | Crea tablas en MySQL |
-| `db/test_conexiones.py` | Verifica conexión a BD |
+**Nota**: El paso 2 instala los paquetes locales (`gestor_capitulo`, `gestor_contenido`, etc.) en modo desarrollo, permitiendo que los cambios se reflejen inmediatamente.
+
+## 📚 Documentación Adicional
+
+- **[GUIA_CONTENIDOS.md](GUIA_CONTENIDOS.md)** - Guía completa del sistema de contenidos
+- **[CONFIGURACION_API.md](CONFIGURACION_API.md)** - Configuración avanzada de la API
+- **[db/README.md](db/README.md)** - Documentación de la base de datos (si existe)
+
+## 🔧 Scripts Disponibles
+
+| Script | Descripción | Uso |
+|--------|-------------|-----|
+| `instalar_paquetes.sh` | **NUEVO**: Instala paquetes modulares | `./instalar_paquetes.sh` |
+| `iniciar_api_final.sh` | Inicia el servidor web | `./iniciar_api_final.sh` |
+| `inicializar_db.py` | Crea las tablas en la BD | `python inicializar_db.py` |
+| `limpiar_db.py` | Limpia todos los datos | `python limpiar_db.py` |
+| `limpiar_tests.py` | Limpia datos de prueba | `python limpiar_tests.py` |
+| `ejecutar_tests.sh` | Ejecuta tests automatizados | `./ejecutar_tests.sh all` |
+
+## 🐛 Solución de Problemas
+
+### Error: "Address already in use"
+```bash
+pkill -f "uvicorn"
+./iniciar_api_final.sh
+```
+
+### Error: "No such table"
+```bash
+python inicializar_db.py
+./iniciar_api_final.sh
+```
+
+### BD con muchos datos de prueba
+```bash
+python limpiar_db.py  # Ingresa "SI" para confirmar
+```
 
 ## 👥 Autores
 
-Anibal Cordoba & Zabala
+Aníbal Córdoba & Zabala
 
 ## 📄 Licencia
 
-Proyecto educativo - Universidad [Nombre]
+Proyecto educativo
+
+---
+
+**🚀 ¡Listo para usar! Ejecuta `./iniciar_api_final.sh` y abre http://localhost:8000**
+
+---
+
+## 📄 Licencia
+
+Proyecto educativo - Universidad [UNER]

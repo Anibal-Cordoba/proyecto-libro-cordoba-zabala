@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Contenidos - Libro Interactivo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+        
+        .form-card, .list-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .form-card h2, .list-card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .dynamic-fields {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .content-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .content-item {
+            background: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .content-item h3 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .content-item .tipo-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .tipo-texto { background: #e3f2fd; color: #1976d2; }
+        .tipo-imagen { background: #f3e5f5; color: #7b1fa2; }
+        .tipo-video { background: #fff3e0; color: #f57c00; }
+        .tipo-objeto3d { background: #e8f5e9; color: #388e3c; }
+        
+        .content-item p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .content-item .actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .btn-delete {
+            background: #ef5350;
+            color: white;
+        }
+        
+        .btn-assign {
+            background: #66bb6a;
+            color: white;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert.show {
+            display: block;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 968px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Gestión de Contenidos</h1>
+            <p>Crea y administra bloques de texto, imágenes, videos y objetos 3D</p>
+            <div class="nav-buttons">
+                <a href="/" class="nav-btn">🏠 Inicio</a>
+                <a href="/crear-capitulo" class="nav-btn">➕ Crear Capítulo</a>
+                <a href="/ver-capitulos" class="nav-btn">📖 Ver Capítulos</a>
+            </div>
+        </div>
+        
+        <div class="content-grid">
+            <!-- Formulario de Creación -->
+            <div class="form-card">
+                <h2>➕ Crear Contenido</h2>
+                
+                <div id="alert" class="alert"></div>
+                
+                <form id="contenidoForm">
+                    <div class="form-group">
+                        <label for="tipo">Tipo de Contenido *</label>
+                        <select id="tipo" name="tipo" required>
+                            <option value="">Seleccionar tipo...</option>
+                            <option value="texto">📝 Texto</option>
+                            <option value="imagen">🖼️ Imagen</option>
+                            <option value="video">🎥 Video</option>
+                            <option value="objeto3d">🎨 Objeto 3D</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tema">Tema *</label>
+                        <input 
+                            type="text" 
+                            id="tema" 
+                            name="tema" 
+                            placeholder="Ej: Células, Fotosíntesis, ADN..." 
+                            maxlength="100"
+                            required
+                        >
+                    </div>
+                    
+                    <div id="dynamicFields" class="dynamic-fields" style="display: none;"></div>
+                    
+                    <button type="submit" class="btn-primary">Crear Contenido</button>
+                </form>
+            </div>
+            
+            <!-- Lista de Contenidos -->
+            <div class="list-card">
+                <h2>📋 Contenidos Creados</h2>
+                
+                <div class="form-group">
+                    <select id="filtroTipo" style="width: auto; display: inline-block; margin-right: 10px;">
+                        <option value="">Todos los tipos</option>
+                        <option value="texto">📝 Texto</option>
+                        <option value="imagen">🖼️ Imagen</option>
+                        <option value="video">🎥 Video</option>
+                        <option value="objeto3d">🎨 Objeto 3D</option>
+                    </select>
+                    <button onclick="cargarContenidos()" class="btn-small" style="background: #667eea; color: white;">🔄 Actualizar</button>
+                </div>
+                
+                <div id="contenidosList" class="content-list">
+                    <p style="text-align: center; color: #999; padding: 40px 0;">
+                        Cargando contenidos...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Campos dinámicos según el tipo de contenido
+        const tipoSelect = document.getElementById('tipo');
+        const dynamicFields = document.getElementById('dynamicFields');
+        const filtroTipo = document.getElementById('filtroTipo');
+        
+        tipoSelect.addEventListener('change', function() {
+            const tipo = this.value;
+            dynamicFields.style.display = tipo ? 'block' : 'none';
+            
+            let html = '';
+            
+            if (tipo === 'texto') {
+                html = `
+                    <div class="form-group">
+                        <label for="cuerpo_texto">Contenido del Texto *</label>
+                        <textarea 
+                            id="cuerpo_texto" 
+                            name="cuerpo_texto" 
+                            placeholder="Escribe aquí el contenido del texto..."
+                            required
+                        ></textarea>
+                    </div>
+                `;
+            } else if (tipo === 'imagen') {
+                html = `
+                    <div class="form-group">
+                        <label for="url_archivo">URL de la Imagen *</label>
+                        <input 
+                            type="url" 
+                            id="url_archivo" 
+                            name="url_archivo" 
+                            placeholder="https://ejemplo.com/imagen.jpg"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="formato">Formato *</label>
+                        <select id="formato" name="formato" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="jpg">JPG</option>
+                            <option value="jpeg">JPEG</option>
+                            <option value="png">PNG</option>
+                            <option value="gif">GIF</option>
+                            <option value="webp">WebP</option>
+                            <option value="svg">SVG</option>
+                        </select>
+                    </div>
+                `;
+            } else if (tipo === 'video') {
+                html = `
+                    <div class="form-group">
+                        <label for="url_archivo">URL del Video *</label>
+                        <input 
+                            type="url" 
+                            id="url_archivo" 
+                            name="url_archivo" 
+                            placeholder="https://ejemplo.com/video.mp4"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="formato">Formato *</label>
+                        <select id="formato" name="formato" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="mp4">MP4</option>
+                            <option value="webm">WebM</option>
+                            <option value="ogg">OGG</option>
+                            <option value="mov">MOV</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="duracion">Duración (segundos)</label>
+                        <input 
+                            type="number" 
+                            id="duracion" 
+                            name="duracion" 
+                            placeholder="Ej: 180"
+                            min="1"
+                            step="0.1"
+                        >
+                    </div>
+                `;
+            } else if (tipo === 'objeto3d') {
+                html = `
+                    <div class="form-group">
+                        <label for="url_archivo">URL del Objeto 3D *</label>
+                        <input 
+                            type="url" 
+                            id="url_archivo" 
+                            name="url_archivo" 
+                            placeholder="https://ejemplo.com/modelo.glb"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="formato">Formato *</label>
+                        <select id="formato" name="formato" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="obj">OBJ</option>
+                            <option value="fbx">FBX</option>
+                            <option value="gltf">GLTF</option>
+                            <option value="glb">GLB</option>
+                        </select>
+                    </div>
+                `;
+            }
+            
+            dynamicFields.innerHTML = html;
+        });
+        
+        // Enviar formulario
+        document.getElementById('contenidoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                tipo: formData.get('tipo'),
+                tema: formData.get('tema'),
+            };
+            
+            // Agregar campos específicos según el tipo
+            if (data.tipo === 'texto') {
+                data.cuerpo_texto = formData.get('cuerpo_texto');
+            } else if (data.tipo === 'imagen' || data.tipo === 'objeto3d') {
+                data.url_archivo = formData.get('url_archivo');
+                data.formato = formData.get('formato');
+            } else if (data.tipo === 'video') {
+                data.url_archivo = formData.get('url_archivo');
+                data.formato = formData.get('formato');
+                const duracion = formData.get('duracion');
+                if (duracion) data.duracion = parseFloat(duracion);
+            }
+            
+            try {
+                const response = await fetch('/api/contenidos/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    mostrarAlerta('✅ Contenido creado exitosamente!', 'success');
+                    e.target.reset();
+                    dynamicFields.style.display = 'none';
+                    cargarContenidos();
+                } else {
+                    const error = await response.json();
+                    mostrarAlerta('❌ Error: ' + (error.detail || 'Error desconocido'), 'error');
+                }
+            } catch (error) {
+                mostrarAlerta('❌ Error de conexión: ' + error.message, 'error');
+            }
+        });
+        
+        // Cargar contenidos
+        async function cargarContenidos() {
+            const filtro = filtroTipo.value;
+            const url = filtro ? `/api/contenidos/?tipo=${filtro}` : '/api/contenidos/';
+            
+            try {
+                const response = await fetch(url);
+                const contenidos = await response.json();
+                
+                const lista = document.getElementById('contenidosList');
+                
+                if (contenidos.length === 0) {
+                    lista.innerHTML = '<p style="text-align: center; color: #999; padding: 40px 0;">No hay contenidos creados aún</p>';
+                    return;
+                }
+                
+                lista.innerHTML = contenidos.map(c => {
+                    const tipoBadge = `tipo-${c.tipo}`;
+                    let detalles = '';
+                    
+                    if (c.tipo === 'texto') {
+                        detalles = `<p><strong>Texto:</strong> ${c.cuerpo_texto.substring(0, 100)}${c.cuerpo_texto.length > 100 ? '...' : ''}</p>`;
+                    } else if (c.tipo === 'imagen' || c.tipo === 'objeto3d') {
+                        detalles = `
+                            <p><strong>URL:</strong> ${c.url_archivo}</p>
+                            <p><strong>Formato:</strong> ${c.formato}</p>
+                        `;
+                    } else if (c.tipo === 'video') {
+                        detalles = `
+                            <p><strong>URL:</strong> ${c.url_archivo}</p>
+                            <p><strong>Formato:</strong> ${c.formato || 'N/A'}</p>
+                            ${c.duracion ? `<p><strong>Duración:</strong> ${c.duracion}s</p>` : ''}
+                        `;
+                    }
+                    
+                    return `
+                        <div class="content-item">
+                            <span class="tipo-badge ${tipoBadge}">${getTipoEmoji(c.tipo)} ${c.tipo.toUpperCase()}</span>
+                            <h3>${c.tema}</h3>
+                            ${detalles}
+                            <p><small>ID: ${c.id_contenido}</small></p>
+                            <div class="actions">
+                                <button class="btn-small btn-delete" onclick="eliminarContenido('${c.id_contenido}')">🗑️ Eliminar</button>
+                                <button class="btn-small btn-assign" onclick="mostrarAsignar('${c.id_contenido}', '${c.tema}')">➕ Asignar a Capítulo</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error al cargar contenidos:', error);
+            }
+        }
+        
+        function getTipoEmoji(tipo) {
+            const emojis = {
+                'texto': '📝',
+                'imagen': '🖼️',
+                'video': '🎥',
+                'objeto3d': '🎨'
+            };
+            return emojis[tipo] || '📄';
+        }
+        
+        async function eliminarContenido(id) {
+            if (!confirm('¿Estás seguro de eliminar este contenido?')) return;
+            
+            try {
+                const response = await fetch(`/api/contenidos/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    mostrarAlerta('✅ Contenido eliminado', 'success');
+                    cargarContenidos();
+                } else {
+                    mostrarAlerta('❌ Error al eliminar', 'error');
+                }
+            } catch (error) {
+                mostrarAlerta('❌ Error de conexión', 'error');
+            }
+        }
+        
+        async function mostrarAsignar(idContenido, tema) {
+            // Cargar capítulos disponibles
+            try {
+                const response = await fetch('/api/capitulos/');
+                const capitulos = await response.json();
+                
+                if (capitulos.length === 0) {
+                    alert('⚠️ No hay capítulos disponibles. Crea un capítulo primero.');
+                    return;
+                }
+                
+                // Crear un mensaje con los capítulos disponibles
+                let mensaje = `Asignar "${tema}" a capítulo:\n\n`;
+                capitulos.forEach((cap, index) => {
+                    mensaje += `${index + 1}. ${cap.titulo} (Cap. ${cap.numero})\n`;
+                });
+                mensaje += `\nIngresa el número del capítulo (1-${capitulos.length}):`;
+                
+                const seleccion = prompt(mensaje);
+                if (!seleccion) return;
+                
+                const indice = parseInt(seleccion) - 1;
+                if (indice < 0 || indice >= capitulos.length) {
+                    alert('❌ Selección inválida');
+                    return;
+                }
+                
+                const capituloSeleccionado = capitulos[indice];
+                
+                const orden = prompt(`Asignar a "${capituloSeleccionado.titulo}"\n\nIngresa el orden (número de posición):`);
+                if (!orden) return;
+                
+                asignarContenido(capituloSeleccionado.id_capitulo, idContenido, parseInt(orden));
+            } catch (error) {
+                alert('❌ Error al cargar capítulos');
+            }
+        }
+        
+        async function asignarContenido(idCapitulo, idContenido, orden) {
+            try {
+                const response = await fetch(`/api/contenidos/asignar?id_capitulo=${idCapitulo}&id_contenido=${idContenido}&orden=${orden}`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    mostrarAlerta('✅ Contenido asignado al capítulo', 'success');
+                } else {
+                    const error = await response.json();
+                    mostrarAlerta('❌ Error: ' + (error.detail || 'Error desconocido'), 'error');
+                }
+            } catch (error) {
+                mostrarAlerta('❌ Error de conexión', 'error');
+            }
+        }
+        
+        function mostrarAlerta(mensaje, tipo) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${tipo} show`;
+            alert.textContent = mensaje;
+            
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Cargar contenidos al inicio
+        cargarContenidos();
+        
+        // Actualizar al cambiar filtro
+        filtroTipo.addEventListener('change', cargarContenidos);
+    </script>
+</body>
+</html>

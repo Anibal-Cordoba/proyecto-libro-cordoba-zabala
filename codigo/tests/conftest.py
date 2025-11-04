@@ -9,6 +9,9 @@ import sys
 import os
 from pathlib import Path
 
+# IMPORTANTE: Establecer variable de entorno ANTES de importar módulos
+os.environ["TESTING"] = "true"
+
 # Agregar el directorio raíz al path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -25,60 +28,75 @@ sys.path.insert(0, str(api_path))
 from db.config import BaseContenido
 from db.contenido.models import Capitulo, Contenido, UnionCapituloContenido
 
-# Importar API
+# Importar API (ya usará BD en memoria por TESTING=true)
 import main as api_main
-from dependencies import get_db
+from dependencies import get_db, engine as test_engine
 
 app = api_main.app
 
 
+def pytest_configure(config):
+    """Hook que se ejecuta al iniciar pytest, antes de cualquier test."""
+    # Crear todas las tablas en la BD de test
+    BaseContenido.metadata.create_all(bind=test_engine)
+    print(f"\n✅ Tablas creadas en BD de test")
+
+
+def pytest_unconfigure(config):
+    """Hook que se ejecuta al finalizar todos los tests."""
+    # Eliminar la base de datos temporal
+    import os
+    test_db_path = Path(__file__).parent.parent / "data" / "test_contenido.db"
+    if test_db_path.exists():
+        os.remove(test_db_path)
+        print(f"\n🗑️  BD de test eliminada")
+
+
 # ===== FIXTURES DE BASE DE DATOS =====
 
-@pytest.fixture(scope="function")
-def test_db_engine():
+@pytest.fixture(scope="function", autouse=True)
+def clean_db():
     """
-    Crea un engine de SQLite en memoria para tests.
-    Se crea uno nuevo por cada función de test.
+    Limpia la base de datos antes de cada test.
+    Se ejecuta automáticamente para todos los tests.
     """
-    engine = create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    
-    # Asegurarse de que los modelos estén registrados
-    # (ya están importados arriba)
-    
-    # Crear todas las tablas usando el metadata de los modelos
-    Capitulo.__table__.create(bind=engine, checkfirst=True)
-    Contenido.__table__.create(bind=engine, checkfirst=True)
-    UnionCapituloContenido.__table__.create(bind=engine, checkfirst=True)
-    
-    yield engine
-    
-    # Limpiar después del test
+    # Limpiar datos antes del test
+    from dependencies import SessionLocal
+    db = SessionLocal()
     try:
-        UnionCapituloContenido.__table__.drop(bind=engine, checkfirst=True)
-        Contenido.__table__.drop(bind=engine, checkfirst=True)
-        Capitulo.__table__.drop(bind=engine, checkfirst=True)
+        db.query(UnionCapituloContenido).delete()
+        db.query(Contenido).delete()
+        db.query(Capitulo).delete()
+        db.commit()
     except:
-        pass
-    engine.dispose()
+        db.rollback()
+    finally:
+        db.close()
+    
+    yield
+    
+    # Limpiar datos después del test
+    db = SessionLocal()
+    try:
+        db.query(UnionCapituloContenido).delete()
+        db.query(Contenido).delete()
+        db.query(Capitulo).delete()
+        db.commit()
+    except:
+        db.rollback()
+    finally:
+        db.close()
 
 
 @pytest.fixture(scope="function")
-def test_db_session(test_db_engine):
+def test_db_session():
     """
     Crea una sesión de base de datos para tests.
-    Cada test obtiene una sesión limpia.
+    Usa la misma configuración que la API (BD en memoria por TESTING=true).
     """
-    TestingSessionLocal = sessionmaker(
-        autocommit=False,
-        autoflush=False,
-        bind=test_db_engine
-    )
+    from dependencies import SessionLocal
     
-    session = TestingSessionLocal()
+    session = SessionLocal()
     
     try:
         yield session
@@ -87,24 +105,13 @@ def test_db_session(test_db_engine):
 
 
 @pytest.fixture(scope="function")
-def client(test_db_session):
+def client():
     """
-    Cliente de prueba de FastAPI con base de datos de test.
-    Sobrescribe la dependencia get_db para usar la BD de test.
+    Cliente de prueba de FastAPI.
+    Ya usa automáticamente la BD en memoria por TESTING=true.
     """
-    def override_get_db():
-        try:
-            yield test_db_session
-        finally:
-            pass
-    
-    app.dependency_overrides[get_db] = override_get_db
-    
     with TestClient(app) as test_client:
         yield test_client
-    
-    # Limpiar override después del test
-    app.dependency_overrides.clear()
 
 
 # ===== FIXTURES DE DATOS DE PRUEBA =====
