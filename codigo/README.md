@@ -11,7 +11,34 @@ Este proyecto implementa un sistema de gestión de contenidos para libros intera
 
 ```
 codigo/
-├── paquetes/                     # 🎯 ARQUITECTURA ACTIVA
+├── api/                          # 🌐 API REST FastAPI
+│   ├── main.py                   # Aplicación principal
+│   ├── dependencies.py           # Dependencias inyectadas
+│   ├── routers/                  # Endpoints por recurso
+│   │   └── capitulos.py          # CRUD capítulos (100% tested)
+│   ├── schemas/                  # Validación Pydantic
+│   │   ├── capitulo.py
+│   │   └── contenido.py
+│   └── templates/                # Plantillas HTML
+│
+├── tests/                        # 🧪 Tests (115 tests - 100% passing)
+│   ├── conftest.py               # Fixtures compartidos
+│   ├── test_cp01_01_visualizar_capitulo.py   # 13 tests
+│   ├── test_cp01_02_capitulo_inexistente.py  # 19 tests
+│   ├── test_cp02_01_crear_capitulo.py        # 26 tests
+│   ├── test_cp02_02_actualizar_capitulo.py   # 15 tests
+│   ├── test_cp02_03_eliminar_capitulo.py     # 10 tests
+│   ├── test_cp02_04_listar_capitulos.py      # 12 tests
+│   ├── test_cp02_05_validaciones_estado.py   # 8 tests
+│   └── test_models.py                         # 12 tests
+│
+├── testing/                      # 📄 Documentación de tests
+│   ├── README.md                 # Índice
+│   ├── GUIA_RAPIDA_TESTING.md   # Guía de ejecución
+│   ├── RESUMEN_COMPLETO_TESTING.md  # Documento consolidado
+│   └── REPORTE_TESTING_*.md      # Reportes detallados
+│
+├── paquetes/                     # 🎯 Paquetes independientes
 │   ├── modelo_capitulo/          → libro-modelo-capitulo
 │   ├── modelo_contenido/         → libro-modelo-contenido
 │   ├── modelo_texto/             → libro-modelo-texto
@@ -26,23 +53,23 @@ codigo/
 │   ├── gestor_capitulo/          → libro-gestor-capitulo
 │   └── README.md                 # Documentación detallada
 │
-├── db/                           # Base de datos
-│   ├── contenido/models.py       # Modelos SQLAlchemy
+├── db/                           # 💾 Base de datos
+│   ├── contenido/models.py       # Modelos SQLAlchemy (89% coverage)
 │   ├── usuarios/models.py
 │   ├── evaluaciones/models.py
 │   ├── config.py                 # Configuración de conexiones
 │   ├── crear_tablas.py           # Script de creación
 │   └── test_conexiones.py        # Verificar conectividad
 │
-├── modelos/                      # [Estructura anterior - referencia]
-├── repositorios/                 # [Estructura anterior - referencia]
-├── gestores/                     # [Estructura anterior - referencia]
+├── htmlcov/                      # 📊 Reportes de coverage
+├── reports/                      # 📈 Reportes de tests
 │
-├── instalar_paquetes.sh          # 🚀 Instalar todos los paquetes
-├── crear_paquetes.py             # Script de creación automatizada
+├── ejecutar_tests.sh             # 🧪 Script de testing
+├── pytest.ini                    # Configuración pytest
+├── instalar_paquetes.sh          # 🚀 Instalar paquetes
+├── crear_paquetes.py             # Script de creación
 ├── verificar_paquetes.py         # Verificar instalación
-├── ejemplo_paquetes.py           # Ejemplos de uso
-└── requirements.txt
+└── requirements.txt              # Dependencias Python
 ```
 
 ### Ver Documentación Completa
@@ -217,6 +244,53 @@ El sistema usa **3 bases de datos MySQL en AWS RDS**:
 
 Ver `db/README.md` para documentación completa de la estructura de bases de datos.
 
+## 🧪 Testing
+
+### Estado Actual: ✅ **115/115 tests pasando (100%)**
+
+| Métrica | Valor |
+|---------|-------|
+| Tests Totales | 115 |
+| Tests Pasando | 115 (100%) ✅ |
+| Coverage Routers | 100% ⭐ |
+| Coverage Models | 89% ✅ |
+| Coverage Total | 31% |
+| Tiempo Ejecución | ~3.7s |
+
+### Suites de Tests Implementadas
+
+- ✅ **CP01_01** (13 tests) - Visualizar capítulo publicado
+- ✅ **CP01_02** (19 tests) - Manejo de errores y seguridad
+- ✅ **CP02_01** (26 tests) - Crear capítulo
+- ✅ **CP02_02** (15 tests) - Actualizar capítulo
+- ✅ **CP02_03** (10 tests) - Eliminar capítulo
+- ✅ **CP02_04** (12 tests) - Listar y filtrar capítulos
+- ✅ **CP02_05** (8 tests) - Validaciones de estado
+- ✅ **test_models** (12 tests) - Tests unitarios ORM
+
+### Ejecutar Tests
+
+```bash
+# Todos los tests
+./ejecutar_tests.sh all
+
+# Por caso de prueba
+./ejecutar_tests.sh cp02_01    # Crear capítulo
+./ejecutar_tests.sh cp02_02    # Actualizar capítulo
+./ejecutar_tests.sh cp02_03    # Eliminar capítulo
+
+# Ver reportes
+xdg-open htmlcov/index.html
+```
+
+### Documentación de Testing
+
+- **[testing/GUIA_RAPIDA_TESTING.md](testing/GUIA_RAPIDA_TESTING.md)** - Guía rápida de ejecución
+- **[testing/RESUMEN_COMPLETO_TESTING.md](testing/RESUMEN_COMPLETO_TESTING.md)** - Documento consolidado (115 tests)
+- **[testing/](testing/)** - Todos los reportes detallados
+
+---
+
 ## 📊 Estado del Proyecto
 
 ✅ **Completado**:
@@ -226,12 +300,14 @@ Ver `db/README.md` para documentación completa de la estructura de bases de dat
 - Gestores de lógica de negocio
 - Modelos SQLAlchemy para 3 bases de datos (15 tablas)
 - Scripts de instalación y verificación
+- **API REST FastAPI con CRUD completo**
+- **115 tests con 100% coverage en endpoints**
 - Documentación completa
 
 🔄 **En Desarrollo**:
-- Tests unitarios
+- Tests de contenidos y relaciones N:M
 - Validaciones de negocio adicionales
-- API REST (opcional)
+- Frontend (React/Vue)
 
 ## 📦 Paquetes Disponibles
 
